@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/notifyicon.ico</file>
+        <file>image/notifyicon2.ico</file>
+        <file>image/notifyicon3.ico</file>
+        <file>image/TrafficMonitor.ico</file>
+    </qresource>
+</RCC>

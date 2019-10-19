@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 namespace Ui {
 class MainWindow;
@@ -16,7 +17,12 @@ public:
     ~MainWindow();
 
 private:
+    void SetupTray();
+
+private:
     Ui::MainWindow *ui;
+    QSystemTrayIcon *m_trayIcon;
+    QMenu *m_trayMenu;
 };
 
 #endif // MAINWINDOW_H
