@@ -1,5 +1,7 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
+#pragma execution_character_set("UTF-8")
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
@@ -23,6 +25,7 @@ private:
     Ui::MainWindow *ui;
     QSystemTrayIcon *m_trayIcon;
     QMenu *m_trayMenu;
+    QAction *m_pCloseAction;
 };
 
 #endif // MAINWINDOW_H
