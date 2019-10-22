@@ -18,6 +18,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    // QWidget interface
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
 private:
     void SetupTray();
 
@@ -37,6 +42,12 @@ private:
     QAction *m_pSettingsAction;
     QAction *m_pAboutAction;
     QAction *m_pExitAction;
+
+	QPoint m_dragPosition;
+
+    // QWidget interface
+protected:
+    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

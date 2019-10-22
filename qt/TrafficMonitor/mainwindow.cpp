@@ -1,5 +1,10 @@
 ﻿#include "mainwindow.h"
 #include <QMenu>
+#include <QPixmap>
+#include <QBitmap>
+#include <QPalette>
+#include <QRegion>
+#include <QMouseEvent>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -11,11 +16,50 @@ MainWindow::MainWindow(QWidget *parent) :
     m_trayIcon->show();
 
     setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+
+    resize(220, 48);
+
+    QString strPath = QCoreApplication::applicationDirPath();
+    QPixmap backImg(strPath + "\\skins\\0默认皮肤\\background_l.bmp");
+    backImg = backImg.scaled(this->size());
+    QPalette palette;
+    palette.setBrush(QPalette::Window, backImg);
+    setPalette(palette);
+
+   // QBitmap mask(strPath + "\\skins\\0默认皮肤\\background_mask_l.bmp");
+    QRegion region(0,0, 214, 42);
+    region = region.subtracted(QRegion(0,0,1,1));
+    region = region.subtracted(QRegion(1,0,1,1));
+    region = region.subtracted(QRegion(1,1,1,1));
+    region = region.subtracted(QRegion(0,1,1,1));
+    region = region.subtracted(QRegion(0,2,1,1));
+    region = region.subtracted(QRegion(2,0,1,1));
+    setMask(region);
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        m_dragPosition = event->globalPos() - frameGeometry().topLeft();
+        event->accept();
+    }
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton)
+    {
+        move(event->globalPos() - m_dragPosition);
+        event->accept();
+    }
 }
 
 void MainWindow::SetupTray()
@@ -100,4 +144,9 @@ void MainWindow::SetupTray()
     QIcon icon(":/image/notifyicon.ico");
     m_trayIcon->setIcon(icon);
     m_trayIcon->setContextMenu(m_trayMenu);
+}
+
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+
 }
