@@ -74,7 +74,13 @@ void MainWindow::SetupTray()
     m_pTopMostAction = new QAction(QObject::tr("总是置顶"), this);
     connect(m_pTopMostAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     m_pMouseHackAction = new QAction(QObject::tr("鼠标穿透"), this);
-    connect(m_pMouseHackAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    m_pMouseHackAction->setCheckable(true);
+    connect(m_pMouseHackAction, &QAction::triggered, this, [&](){
+        auto bChecked = m_pMouseHackAction->isChecked();
+        m_pMouseHackAction->setChecked(bChecked);
+        setAttribute(Qt::WA_TransparentForMouseEvents);
+        setAttribute(Qt::WA_TranslucentBackground);
+    });
     m_pLockWndPosAction = new QAction(QObject::tr("锁定窗口位置"), this);
     connect(m_pLockWndPosAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     m_pShowTrayNotifyAction = new QAction(QObject::tr("显示通知区域图标"), this);
