@@ -41,3 +41,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc
+
+win32 {
+        skin_files_dir = $$PWD\skins\*.*
+        CONFIG(debug, debug|release){
+                dst_dir = $$OUT_PWD\\debug\\skins\\
+        } else {
+                dst_dir = $$OUT_PWD\\release\\skins\\
+        }
+
+        skin_files_dir ~= s,/,\\,g
+        dst_dir ~= s,/,\\,g
+        message($$skin_files_dir)
+        message($$dst_dir)
+        system(xcopy $$skin_files_dir $$dst_dir /y /e)
+}
