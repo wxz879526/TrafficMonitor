@@ -6,6 +6,7 @@
 #include <QRegion>
 #include <QMouseEvent>
 #include <QSettings>
+#include <windows.h>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -77,9 +78,10 @@ void MainWindow::SetupTray()
     m_pMouseHackAction->setCheckable(true);
     connect(m_pMouseHackAction, &QAction::triggered, this, [&](){
         auto bChecked = m_pMouseHackAction->isChecked();
-        m_pMouseHackAction->setChecked(bChecked);
-        setAttribute(Qt::WA_TransparentForMouseEvents);
-        setAttribute(Qt::WA_TranslucentBackground);
+        if (bChecked)
+             SetWindowLong((HWND)winId(), GWL_EXSTYLE, GetWindowLong((HWND)winId(), GWL_EXSTYLE)|WS_EX_TRANSPARENT);
+        else
+             SetWindowLong((HWND)winId(), GWL_EXSTYLE, GetWindowLong((HWND)winId(), GWL_EXSTYLE) & ~WS_EX_TRANSPARENT);
     });
     m_pLockWndPosAction = new QAction(QObject::tr("锁定窗口位置"), this);
     connect(m_pLockWndPosAction, SIGNAL(triggered()), qApp, SLOT(quit()));

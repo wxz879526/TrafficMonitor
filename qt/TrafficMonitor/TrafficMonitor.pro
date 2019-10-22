@@ -43,6 +43,7 @@ RESOURCES += \
     resources.qrc
 
 win32 {
+        LIBS += -lUser32
         skin_files_dir = $$PWD\skins\*.*
         CONFIG(debug, debug|release){
                 dst_dir = $$OUT_PWD\\debug\\skins\\
