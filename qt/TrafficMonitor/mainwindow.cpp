@@ -90,7 +90,7 @@ void MainWindow::SetupTray()
     m_pAboutAction = new QAction(QObject::tr("关于"), this);
     connect(m_pAboutAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     m_pExitAction = new QAction(QObject::tr("退出程序"), this);
-    connect(m_pExitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(m_pExitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 
 
     auto netConnMenu = m_trayMenu->addMenu(QObject::tr("选择网络连接"));
