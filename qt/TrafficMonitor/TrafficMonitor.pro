@@ -44,6 +44,7 @@ RESOURCES += \
 
 win32 {
         LIBS += -lUser32
+        LIBS += -liphlpapi
         skin_files_dir = $$PWD\skins\*.*
         CONFIG(debug, debug|release){
                 dst_dir = $$OUT_PWD\\debug\\skins\\
