@@ -28,14 +28,14 @@ MainWindow::MainWindow(QWidget *parent) :
     setPalette(palette);
 
    // QBitmap mask(strPath + "\\skins\\0默认皮肤\\background_mask_l.bmp");
-    QRegion region(0,0, 214, 42);
+   /* QRegion region(0,0, 214, 42);
     region = region.subtracted(QRegion(0,0,1,1));
     region = region.subtracted(QRegion(1,0,1,1));
     region = region.subtracted(QRegion(1,1,1,1));
     region = region.subtracted(QRegion(0,1,1,1));
     region = region.subtracted(QRegion(0,2,1,1));
     region = region.subtracted(QRegion(2,0,1,1));
-    setMask(region);
+    setMask(region);*/
 
     QSettings configFile(strPath + "\\skins\\0默认皮肤\\skin.ini", QSettings::IniFormat);
     configFile.beginGroup("skin");
@@ -108,20 +108,30 @@ void MainWindow::SetupTray()
     m_trayMenu->addAction(m_pMoreInfoAction);
     m_trayMenu->addAction(m_pTaskWndAction);
     m_trayMenu->addAction(m_pHideMainWndAction);
+
+    // 窗口透明度设置
     auto wndTransparent = m_trayMenu->addMenu(QObject::tr("窗口不透明度"));
-    auto percent_100 = new QAction(QObject::tr("100%"), this);
-    connect(percent_100, SIGNAL(triggered()), qApp, SLOT(quit()));
-    wndTransparent->addAction(percent_100);
-    auto percent_80 = new QAction(QObject::tr("80%"), this);
-    connect(percent_80, SIGNAL(triggered()), qApp, SLOT(quit()));
-    wndTransparent->addAction(percent_80);
-    auto percent_60 = new QAction(QObject::tr("60%"), this);
-    connect(percent_60, SIGNAL(triggered()), qApp, SLOT(quit()));
-    wndTransparent->addAction(percent_60);
-    auto percent_40 = new QAction(QObject::tr("40%"), this);
-    connect(percent_40, SIGNAL(triggered()), qApp, SLOT(quit()));
-    wndTransparent->addAction(percent_40);
+    auto pTransparentSetGrp = new QActionGroup(this);
+    pTransparentSetGrp->setExclusive(true);
+    auto addTransparentAction = [=](const QString &strTitle, qreal opacity){
+        auto percentAction = new QAction(strTitle, pTransparentSetGrp);
+        connect(percentAction, &QAction::triggered, this, [=](){
+            setWindowOpacity(opacity);
+            percentAction->setCheckable(true);
+            percentAction->setChecked(true);
+        });
+        wndTransparent->addAction(percentAction);
+        return percentAction;
+    };
+
+    addTransparentAction(QObject::tr("100%"), 1);
+    addTransparentAction(QObject::tr("80%"), 0.8);
+    addTransparentAction(QObject::tr("60%"), 0.6);
+    addTransparentAction(QObject::tr("40%"), 0.4);
+
     m_trayMenu->addSeparator();
+
+
     auto otherFuncMenu = m_trayMenu->addMenu(QObject::tr("其他功能"));
     auto changeSkin = new QAction(QObject::tr("更换皮肤"), this);
     connect(changeSkin, SIGNAL(triggered()), qApp, SLOT(quit()));
