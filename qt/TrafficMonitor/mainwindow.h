@@ -22,6 +22,7 @@ public:
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     void SetupTray();
@@ -44,10 +45,6 @@ private:
     QAction *m_pExitAction;
 
 	QPoint m_dragPosition;
-
-    // QWidget interface
-protected:
-    void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // MAINWINDOW_H

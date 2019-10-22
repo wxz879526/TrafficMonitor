@@ -5,6 +5,7 @@
 #include <QPalette>
 #include <QRegion>
 #include <QMouseEvent>
+#include <QSettings>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -36,7 +37,10 @@ MainWindow::MainWindow(QWidget *parent) :
     region = region.subtracted(QRegion(2,0,1,1));
     setMask(region);
 
-
+    QSettings configFile(strPath + "\\skins\\0默认皮肤\\skin.ini", QSettings::IniFormat);
+    configFile.beginGroup("skin");
+    auto color = configFile.value("text_color", 1000).toInt();
+    configFile.endGroup();
 }
 
 MainWindow::~MainWindow()
