@@ -70,7 +70,7 @@ private:
     MIB_IFTABLE* m_pIfTable{nullptr};
     DWORD m_dwSize{0};	//m_pIfTable的大小
     int m_connection_selected{ 0 };	//要显示流量的连接的序号
-    bool m_auto_select{ false };	//自动选择连接
+    bool m_auto_select{ true };	//自动选择连接
     unsigned int m_in_bytes;		//当前已接收的字节数
     unsigned int m_out_bytes;	//当前已发送的字节数
     unsigned int m_last_in_bytes{};	//上次已接收的字节数
@@ -79,6 +79,14 @@ private:
 
     int m_restart_cnt{ -1 };	//重新初始化次数
     bool m_connection_change_flag{ false };		//如果执行过IniConnection()函数，该flag会置为true
+
+    //以下数据定义为App类中的公共成员，以便于在主对话框和任务栏窗口中都能访问
+    unsigned int m_in_speed{};		//下载速度
+    unsigned int m_out_speed{};		//上传速度
+    int m_cpu_usage{};		//CPU利用率
+    int m_memory_usage{};	//内存利用率
+    int m_used_memory{};	//可用物理内存（单位为KB）
+    int m_total_memory{};	//物理内存总量（单位为KB）
 };
 
 #endif // MAINWINDOW_H

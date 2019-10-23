@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 #include <QSettings>
 #include <QTimer>
+#include "formatutils.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -269,10 +270,41 @@ void MainWindow::showInfo()
 
 void MainWindow::OnTimerForNetSpeed()
 {
-    showInfo();
+    //获取网络连接速度
+    int rtn = GetIfTable(m_pIfTable, &m_dwSize, FALSE);
+    m_in_bytes = m_pIfTable->table[m_connections[m_connection_selected].index].dwInOctets;
+    m_out_bytes = m_pIfTable->table[m_connections[m_connection_selected].index].dwOutOctets;
+
+    //如果发送和接收的字节数为0或上次发送和接收的字节数为0或当前连接已改变时，网速无效
+    if ((m_in_bytes == 0 && m_out_bytes == 0) || (m_last_in_bytes == 0 && m_last_out_bytes) || m_connection_change_flag)
+    {
+        m_in_speed = 0;
+        m_out_speed = 0;
+    }
+    else
+    {
+        m_in_speed = m_in_bytes - m_last_in_bytes;
+        m_out_speed = m_out_bytes - m_last_out_bytes;
+    }
+    //如果大于1GB/s，说明可能产生了异常，网速无效
+    if (m_in_speed > 1073741824)
+        m_in_speed = 0;
+    if (m_out_speed > 1073741824)
+        m_out_speed = 0;
+
+    m_connection_change_flag = false;	//清除连接发生变化的标志
+
+    m_last_in_bytes = m_in_bytes;
+    m_last_out_bytes = m_out_bytes;
+
+    QString strSpeedIn = FormatUtils::SpeedToString(m_in_speed);
+    ui->m_speedDown->setText(QString(QObject::tr("下载：")) + strSpeedIn);
+
+    QString strSpeedOut = FormatUtils::SpeedToString(m_out_speed);
+    ui->m_speedUp->setText(QString(QObject::tr("上传：")) + strSpeedOut);
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
-    ui->m_speedUp->setText("sosishshsihs");
+
 }
