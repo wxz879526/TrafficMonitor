@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     initConnections();
     m_trayIcon->show();
 
-    setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 
     resize(280, 60);
 
@@ -78,8 +78,26 @@ void MainWindow::SetupTray()
     m_trayMenu = new QMenu(this);
     m_pConnDetailAction = new QAction(QObject::tr("连接详情"), this);
     connect(m_pConnDetailAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-    m_pTopMostAction = new QAction(QObject::tr("总是置顶"), this);
-    connect(m_pTopMostAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    auto pTopMostAction = new QAction(QObject::tr("总是置顶"), this);
+
+    // 置顶
+    pTopMostAction->setCheckable(true);
+    connect(pTopMostAction, &QAction::triggered, qApp, [=](){
+        auto bChecked = pTopMostAction->isChecked();
+        HWND hWnd = reinterpret_cast<HWND>(winId());
+        HWND hTargetWnd = nullptr;
+        if (bChecked)
+        {
+            hTargetWnd = reinterpret_cast<HWND>(HWND_TOPMOST);
+        }
+        else
+        {
+             hTargetWnd = reinterpret_cast<HWND>(HWND_NOTOPMOST);
+        }
+        SetWindowPos(hWnd, hTargetWnd, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+    });
+
+    // 鼠标穿透
     m_pMouseHackAction = new QAction(QObject::tr("鼠标穿透"), this);
     m_pMouseHackAction->setCheckable(true);
     connect(m_pMouseHackAction, &QAction::triggered, this, [&](){
@@ -117,7 +135,7 @@ void MainWindow::SetupTray()
     m_trayMenu->addAction(m_pConnDetailAction);
     m_trayMenu->addSeparator();
 
-    m_trayMenu->addAction(m_pTopMostAction);
+    m_trayMenu->addAction(pTopMostAction);
     m_trayMenu->addAction(m_pMouseHackAction);
     m_trayMenu->addAction(m_pLockWndPosAction);
     m_trayMenu->addAction(m_pShowTrayNotifyAction);
@@ -173,6 +191,7 @@ void MainWindow::SetupTray()
     QIcon icon(":/image/notifyicon.ico");
     m_trayIcon->setIcon(icon);
     m_trayIcon->setContextMenu(m_trayMenu);
+    m_trayIcon->setToolTip("流量监控");
 }
 
 void MainWindow::initConnections()

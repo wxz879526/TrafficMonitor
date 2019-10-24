@@ -51,7 +51,6 @@ private:
 
     QMenu *m_connectionSubMenu;
     QAction *m_pConnDetailAction;
-    QAction *m_pTopMostAction;
     QAction *m_pMouseHackAction;
     QAction *m_pLockWndPosAction;
     QAction *m_pShowTrayNotifyAction;
