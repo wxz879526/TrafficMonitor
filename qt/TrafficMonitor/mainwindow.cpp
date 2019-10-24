@@ -40,10 +40,10 @@ MainWindow::MainWindow(QWidget *parent) :
     region = region.subtracted(QRegion(2,0,1,1));
     setMask(region);*/
 
-    QSettings configFile(strPath + "\\skins\\0默认皮肤\\skin.ini", QSettings::IniFormat);
+    /*QSettings configFile(strPath + "\\skins\\0默认皮肤\\skin.ini", QSettings::IniFormat);
     configFile.beginGroup("skin");
     auto color = configFile.value("text_color", 1000).toInt();
-    configFile.endGroup();
+    configFile.endGroup();*/
 
     QTimer *pTimer = new QTimer(this);
     connect(pTimer, &QTimer::timeout, this, &MainWindow::OnTimerForNetSpeed);
@@ -84,11 +84,16 @@ void MainWindow::SetupTray()
     m_pMouseHackAction->setCheckable(true);
     connect(m_pMouseHackAction, &QAction::triggered, this, [&](){
         auto bChecked = m_pMouseHackAction->isChecked();
+        HWND hWnd = reinterpret_cast<HWND>(winId());
         if (bChecked)
-            SetWindowLong((HWND)winId(), GWL_EXSTYLE, GetWindowLong((HWND)winId(), GWL_EXSTYLE)|WS_EX_TRANSPARENT);
+        {
+            setWindowOpacity(0.99);
+            SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE)|WS_EX_TRANSPARENT);
+        }
         else
-            SetWindowLong((HWND)winId(), GWL_EXSTYLE, GetWindowLong((HWND)winId(), GWL_EXSTYLE) & ~WS_EX_TRANSPARENT);
-    });
+            SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) & ~WS_EX_TRANSPARENT);
+        }
+    );
     m_pLockWndPosAction = new QAction(QObject::tr("锁定窗口位置"), this);
     connect(m_pLockWndPosAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     m_pShowTrayNotifyAction = new QAction(QObject::tr("显示通知区域图标"), this);
@@ -175,27 +180,27 @@ void MainWindow::initConnections()
     //为m_pIfTable开辟所需大小的内存
     free(m_pIfTable);
     m_dwSize = sizeof(MIB_IFTABLE);
-    m_pIfTable = (MIB_IFTABLE *)malloc(m_dwSize);
-    int rtn;
+    m_pIfTable = static_cast<MIB_IFTABLE *>(malloc(m_dwSize));
+    DWORD rtn;
     rtn = GetIfTable(m_pIfTable, &m_dwSize, FALSE);
     if (rtn == ERROR_INSUFFICIENT_BUFFER)	//如果函数返回值为ERROR_INSUFFICIENT_BUFFER，说明m_pIfTable的大小不够
     {
         free(m_pIfTable);
-        m_pIfTable = (MIB_IFTABLE *)malloc(m_dwSize);	//用新的大小重新开辟一块内存
+        m_pIfTable = static_cast<MIB_IFTABLE *>(malloc(m_dwSize));	//用新的大小重新开辟一块内存
     }
     //获取当前所有的连接，并保存到m_connections容器中
     m_connections.clear();
     GetIfTable(m_pIfTable, &m_dwSize, FALSE);
     for (unsigned int i{}; i < m_pIfTable->dwNumEntries; i++)
     {
-        QString descr = QString(QLatin1String((const char*)m_pIfTable->table[i].bDescr));
+        QString descr = QString(QLatin1String(reinterpret_cast<const char*>(m_pIfTable->table[i].bDescr)));
         if (m_pIfTable->table[i].dwInOctets > 0 || m_pIfTable->table[i].dwOutOctets > 0 || descr == m_connection_name)		//查找接收或发送数据量大于0的连接和上次选择的连接
         {
             m_connections.emplace_back(i, descr, m_pIfTable->table[i].dwInOctets, m_pIfTable->table[i].dwOutOctets);
         }
     }
     if (m_connections.empty())
-        m_connections.emplace_back(0, QString(QLatin1String((const char*)m_pIfTable->table[0].bDescr)), 0, 0);
+        m_connections.emplace_back(0, QString(QLatin1String(reinterpret_cast<const char*>(m_pIfTable->table[0].bDescr))), 0, 0);
 
     //if (m_connection_selected < 0 || m_connection_selected >= m_connections.size() || m_auto_select)
     //	AutoSelect();
@@ -215,13 +220,13 @@ void MainWindow::initConnections()
     else		//查找网络名为上次选择的连接
     {
         m_connection_selected = 0;
-        for (size_t i{}; i < m_connections.size(); i++)
+        for (size_t i = 0; i < m_connections.size(); i++)
         {
             if (m_connections[i].description == m_connection_name)
-                m_connection_selected = i;
+                m_connection_selected = static_cast<int>(i);
         }
     }
-    m_connection_name = m_connections[m_connection_selected].description;
+    m_connection_name = m_connections[static_cast<size_t>(m_connection_selected)].description;
 
     //根据已获取到的连接在菜单中添加相应项目
     m_connectionSubMenu->clear();
@@ -232,7 +237,7 @@ void MainWindow::initConnections()
     m_connectionSubMenu->addAction(autoSelect);
     //设置“选择网卡”子菜单项
     QString connection_descr;
-    for (int i{}; i < m_connections.size(); i++)
+    for (size_t i = 0; i < m_connections.size(); i++)
     {
         auto pAction = new QAction(m_connections[i].description, pConnectionsGrp);
         m_connectionSubMenu->addAction(pAction);
@@ -249,7 +254,7 @@ void MainWindow::autoSelect()
     //m_connection_selected = m_connections[0].index;
     m_connection_selected = 0;
     //自动选择连接时，查找已发送和已接收字节数之和最多的那个连接，并将其设置为当前查看的连接
-    for (int i{}; i<m_connections.size(); i++)
+    for (size_t i = 0; i<m_connections.size(); i++)
     {
         if (m_pIfTable->table[m_connections[i].index].dwOperStatus == IF_OPER_STATUS_OPERATIONAL)		//只选择网络状态为正常的连接
         {
@@ -257,7 +262,7 @@ void MainWindow::autoSelect()
             if (in_out_bytes > max_in_out_bytes)
             {
                 max_in_out_bytes = in_out_bytes;
-                m_connection_selected = i;
+                m_connection_selected = static_cast<int>(i);
             }
         }
     }
@@ -271,9 +276,10 @@ void MainWindow::showInfo()
 void MainWindow::OnTimerForNetSpeed()
 {
     //获取网络连接速度
-    int rtn = GetIfTable(m_pIfTable, &m_dwSize, FALSE);
-    m_in_bytes = m_pIfTable->table[m_connections[m_connection_selected].index].dwInOctets;
-    m_out_bytes = m_pIfTable->table[m_connections[m_connection_selected].index].dwOutOctets;
+    GetIfTable(m_pIfTable, &m_dwSize, FALSE);
+    size_t index = static_cast<size_t>(m_connection_selected);
+    m_in_bytes = m_pIfTable->table[m_connections[index].index].dwInOctets;
+    m_out_bytes = m_pIfTable->table[m_connections[index].index].dwOutOctets;
 
     //如果发送和接收的字节数为0或上次发送和接收的字节数为0或当前连接已改变时，网速无效
     if ((m_in_bytes == 0 && m_out_bytes == 0) || (m_last_in_bytes == 0 && m_last_out_bytes) || m_connection_change_flag)
@@ -297,14 +303,51 @@ void MainWindow::OnTimerForNetSpeed()
     m_last_in_bytes = m_in_bytes;
     m_last_out_bytes = m_out_bytes;
 
+    //获取CPU利用率
+    FILETIME idleTime;
+    FILETIME kernelTime;
+    FILETIME userTime;
+    GetSystemTimes(&idleTime, &kernelTime, &userTime);
+
+    qint64 idle = FormatUtils::CompareFileTime2(m_preidleTime, idleTime);
+    qint64 kernel = FormatUtils::CompareFileTime2(m_prekernelTime, kernelTime);
+    qint64 user = FormatUtils::CompareFileTime2(m_preuserTime, userTime);
+
+    if (kernel + user == 0)
+    {
+        m_cpu_usage = 0;
+    }
+    else
+    {
+        //（总的时间-空闲时间）/总的时间=占用cpu的时间就是使用率
+        m_cpu_usage = static_cast<int>(abs((kernel + user - idle) * 100 / (kernel + user)));
+    }
+    m_preidleTime = idleTime;
+    m_prekernelTime = kernelTime;
+    m_preuserTime = userTime;
+
+    //获取内存利用率
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof(statex);
+    GlobalMemoryStatusEx(&statex);
+    m_memory_usage = static_cast<int>(statex.dwMemoryLoad);
+    m_used_memory = static_cast<int>((statex.ullTotalPhys - statex.ullAvailPhys) / 1024);
+    m_total_memory  = static_cast<int>(statex.ullTotalPhys / 1024);
+
     QString strSpeedIn = FormatUtils::SpeedToString(m_in_speed);
-    ui->m_speedDown->setText(QString(QObject::tr("下载：")) + strSpeedIn);
+    ui->m_speedDown->setText(QString(QObject::tr("下载: ")) + strSpeedIn);
 
     QString strSpeedOut = FormatUtils::SpeedToString(m_out_speed);
-    ui->m_speedUp->setText(QString(QObject::tr("上传：")) + strSpeedOut);
+    ui->m_speedUp->setText(QString(QObject::tr("上传: ")) + strSpeedOut);
+
+    QString strCPU = QString(" CPU: %1%").arg(m_cpu_usage);
+    ui->m_cpuUsage->setText(strCPU);
+
+    QString strMem = QString("内存: %1%").arg(m_memory_usage);
+    ui->m_memUsage->setText(strMem);
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
-
+    Q_UNUSED(event);
 }

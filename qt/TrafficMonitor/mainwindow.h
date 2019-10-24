@@ -1,12 +1,9 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#pragma execution_character_set("UTF-8")
-
+#include <commonheader.h>
 #include <QMainWindow>
 #include <QSystemTrayIcon>
-#include <windows.h>
-#include <iphlpapi.h>
 
 //嵌套结构体，保存一个网络连接的索引和描述等信息
 struct NetWorkConection
@@ -76,6 +73,10 @@ private:
     unsigned int m_last_in_bytes{};	//上次已接收的字节数
     unsigned int m_last_out_bytes{};	//上次已发送的字节数
     QString m_connection_name;	//当前选择网络的名称
+
+    FILETIME m_preidleTime;
+    FILETIME m_prekernelTime;
+    FILETIME m_preuserTime;
 
     int m_restart_cnt{ -1 };	//重新初始化次数
     bool m_connection_change_flag{ false };		//如果执行过IniConnection()函数，该flag会置为true

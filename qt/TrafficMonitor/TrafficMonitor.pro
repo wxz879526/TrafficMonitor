@@ -31,7 +31,8 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h \
-    formatutils.h
+    formatutils.h \
+    commonheader.h
 
 FORMS += \
         mainwindow.ui

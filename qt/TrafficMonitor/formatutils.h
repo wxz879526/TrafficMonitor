@@ -1,9 +1,8 @@
-#ifndef FORMATUTILS_H
+﻿#ifndef FORMATUTILS_H
 #define FORMATUTILS_H
 
-#pragma execution_character_set("UTF-8")
-
 #include <QString>
+#include <commonheader.h>
 
 //网速单位
 enum class SpeedUnit
@@ -24,6 +23,9 @@ public:
         返回值：转换后的字符串
         */
     static QString SpeedToString(unsigned int speedSize, bool short_mode = false, SpeedUnit unit = SpeedUnit::AUTO, bool hide_unit = false);
+
+    //返回两个FILETIME结构的时间差
+    static __int64 CompareFileTime2(FILETIME time1, FILETIME time2);
 
 };
 
