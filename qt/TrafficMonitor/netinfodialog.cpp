@@ -69,18 +69,19 @@ void NetInfoDialog::GetIPAddress()
 
 void NetInfoDialog::AddItems()
 {
-    ui->tableWidget->setRowCount(10);
+    //ui->tableWidget->setRowCount(10);
     QString temp;
 
-    auto funcAdd = [=](int row, int col, const QString &strValue) {
-        ui->tableWidget->setItem(row, col, new QTableWidgetItem(strValue));
+    auto funcAdd = [=](const QString &strKey, const QString &strValue) {
+        int row = ui->tableWidget->rowCount();
+        ui->tableWidget->insertRow(row);
+        ui->tableWidget->setItem(row, 0, new QTableWidgetItem(strKey));
+        ui->tableWidget->setItem(row, 1, new QTableWidgetItem(strValue));
     };
 
-    funcAdd(0, 0, QString(QObject::tr("接口名")));
-    funcAdd(0, 1, QString::fromStdWString(m_network_info.wszName));
+    funcAdd(QString(QObject::tr("接口名")), QString::fromStdWString(m_network_info.wszName));
 
-    funcAdd(1, 0, QString(QObject::tr("接口描述")));
-    funcAdd(1, 1, QString::fromUtf8((const char*)m_network_info.bDescr));
+    funcAdd(QString(QObject::tr("接口描述")), QString::fromUtf8((const char*)m_network_info.bDescr));
 
 
     /*m_info_list.InsertItem(2, _T("连接类型"));
