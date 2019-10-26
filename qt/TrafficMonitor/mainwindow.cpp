@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 #include <QSettings>
 #include <QTimer>
+#include "netinfodialog.h"
 #include "formatutils.h"
 #include "ui_mainwindow.h"
 
@@ -76,8 +77,11 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 void MainWindow::SetupTray()
 {
     m_trayMenu = new QMenu(this);
-    m_pConnDetailAction = new QAction(QObject::tr("连接详情"), this);
-    connect(m_pConnDetailAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    auto pConnDetailAction = new QAction(QObject::tr("连接详情"), this);
+    connect(pConnDetailAction, &QAction::triggered, this, [=](){
+        NetInfoDialog dlg(m_pIfTable->table[m_connections[m_connection_selected].index], this);
+        dlg.exec();
+    });
     auto pTopMostAction = new QAction(QObject::tr("总是置顶"), this);
 
     // 置顶
@@ -132,7 +136,7 @@ void MainWindow::SetupTray()
 
     m_connectionSubMenu = m_trayMenu->addMenu(QObject::tr("选择网络连接"));
 
-    m_trayMenu->addAction(m_pConnDetailAction);
+    m_trayMenu->addAction(pConnDetailAction);
     m_trayMenu->addSeparator();
 
     m_trayMenu->addAction(pTopMostAction);
@@ -252,6 +256,8 @@ void MainWindow::initConnections()
     QActionGroup *pConnectionsGrp = new QActionGroup(this);
     pConnectionsGrp->setExclusive(true);
     auto autoSelect = new QAction(QObject::tr("自动选择"), pConnectionsGrp);
+    autoSelect->setCheckable(true);
+    autoSelect->setChecked(true);
     connect(autoSelect, SIGNAL(triggered()), qApp, SLOT(quit()));
     m_connectionSubMenu->addAction(autoSelect);
     //设置“选择网卡”子菜单项
@@ -369,4 +375,9 @@ void MainWindow::OnTimerForNetSpeed()
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
+}
+
+void MainWindow::contextMenuEvent(QContextMenuEvent *event)
+{
+    m_trayMenu->exec(QCursor::pos());
 }

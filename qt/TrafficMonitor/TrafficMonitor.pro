@@ -27,15 +27,18 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    formatutils.cpp
+    formatutils.cpp \
+    netinfodialog.cpp
 
 HEADERS += \
         mainwindow.h \
     formatutils.h \
-    commonheader.h
+    commonheader.h \
+    netinfodialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    netinfodialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

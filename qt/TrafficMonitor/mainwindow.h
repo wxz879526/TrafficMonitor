@@ -13,7 +13,10 @@ struct NetWorkConection
     unsigned int in_bytes;	//初始时已接收字节数
     unsigned int out_bytes;	//初始时已发送字节数
     NetWorkConection(int idx, QString desc, unsigned int in_bytes, unsigned out_bytes)
-        : index{ idx }, description{ desc }, in_bytes{ in_bytes }, out_bytes{out_bytes}		//构造函数
+        : index(idx)
+        , description(desc)
+        , in_bytes(in_bytes)
+        , out_bytes(out_bytes)		//构造函数
     {}
 };
 
@@ -27,13 +30,14 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     // QWidget interface
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     void SetupTray();
@@ -50,7 +54,6 @@ private:
     QMenu *m_trayMenu;
 
     QMenu *m_connectionSubMenu;
-    QAction *m_pConnDetailAction;
     QAction *m_pMouseHackAction;
     QAction *m_pLockWndPosAction;
     QAction *m_pShowTrayNotifyAction;
