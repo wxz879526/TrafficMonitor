@@ -3,6 +3,7 @@
 
 #include <commonheader.h>
 #include <QMainWindow>
+#include <QDateTime>
 #include <QSystemTrayIcon>
 
 //嵌套结构体，保存一个网络连接的索引和描述等信息
@@ -90,6 +91,8 @@ private:
     int m_memory_usage{};	//内存利用率
     int m_used_memory{};	//可用物理内存（单位为KB）
     int m_total_memory{};	//物理内存总量（单位为KB）
+
+    QDateTime m_startTime;
 };
 
 #endif // MAINWINDOW_H

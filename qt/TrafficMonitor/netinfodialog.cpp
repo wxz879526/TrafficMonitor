@@ -1,11 +1,17 @@
 ﻿#include "netinfodialog.h"
 #include <QStringList>
+#include <QTime>
+#include <QDateTime>
+#include "formatutils.h"
 #include "ui_netinfodialog.h"
 
-NetInfoDialog::NetInfoDialog(MIB_IFROW network_info, QWidget *parent) :
+NetInfoDialog::NetInfoDialog(MIB_IFROW network_info, int in, int out, QDateTime tm, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::NetInfoDialog),
-    m_network_info(network_info)
+    m_network_info(network_info),
+    m_in_bytes(in),
+    m_out_bytes(out),
+    m_start_time(tm)
 {
     ui->setupUi(this);
 
@@ -18,6 +24,7 @@ NetInfoDialog::NetInfoDialog(MIB_IFROW network_info, QWidget *parent) :
     headerTitle << "项目" << "值";
     ui->tableWidget->setHorizontalHeaderLabels(headerTitle);
 
+    GetIPAddress();
     AddItems();
 }
 
@@ -80,59 +87,51 @@ void NetInfoDialog::AddItems()
     };
 
     funcAdd(QString(QObject::tr("接口名")), QString::fromStdWString(m_network_info.wszName));
-
     funcAdd(QString(QObject::tr("接口描述")), QString::fromUtf8((const char*)m_network_info.bDescr));
 
-
-    /*m_info_list.InsertItem(2, _T("连接类型"));
     switch (m_network_info.dwType)
     {
-    case IF_TYPE_OTHER: temp = _T("其他类型网络"); break;
-    case IF_TYPE_ETHERNET_CSMACD: temp = _T("以太网网络"); break;
-    case IF_TYPE_ISO88025_TOKENRING: temp = _T("令牌环网络"); break;
-    case IF_TYPE_FDDI: temp = _T("光纤分布式数据接口 (FDDI) 网络"); break;
-    case IF_TYPE_PPP: temp = _T("PPP 网络"); break;
-    case IF_TYPE_SOFTWARE_LOOPBACK: temp = _T("软件环回网络"); break;
-    case IF_TYPE_ATM: temp = _T("ATM 网络"); break;
-    case IF_TYPE_IEEE80211: temp = _T("IEEE 802.11 无线网络"); break;
-    case IF_TYPE_TUNNEL: temp = _T("隧道类型封装网络"); break;
-    case IF_TYPE_IEEE1394: temp = _T("IEEE 1394 (Firewire) 高性能串行总线网络"); break;
-    case IF_TYPE_IEEE80216_WMAN: temp = _T("对于 WiMax 设备的移动宽带"); break;
-    case IF_TYPE_WWANPP: temp = _T("基于 GSM 网络设备的移动宽带"); break;
-    case IF_TYPE_WWANPP2: temp = _T("基于 CDMA 的设备移动宽带"); break;
-    default: temp = _T("未知网络"); break;
+    case IF_TYPE_OTHER: temp = QString(QObject::tr("其他类型网络")); break;
+    case IF_TYPE_ETHERNET_CSMACD: temp = QString(QObject::tr("以太网网络")); break;
+    case IF_TYPE_ISO88025_TOKENRING: temp = temp = QString(QObject::tr("令牌环网络")); break;
+    case IF_TYPE_FDDI: temp = temp = QString(QObject::tr("光纤分布式数据接口 (FDDI) 网络")); break;
+    case IF_TYPE_PPP: temp = temp = QString(QObject::tr("PPP 网络")); break;
+    case IF_TYPE_SOFTWARE_LOOPBACK: temp = temp = QString(QObject::tr("软件环回网络")); break;
+    case IF_TYPE_ATM: temp = temp = QString(QObject::tr("ATM 网络")); break;
+    case IF_TYPE_IEEE80211: temp = temp = QString(QObject::tr("IEEE 802.11 无线网络")); break;
+    case IF_TYPE_TUNNEL: temp = temp = QString(QObject::tr("隧道类型封装网络")); break;
+    case IF_TYPE_IEEE1394: temp = temp = QString(QObject::tr("IEEE 1394 (Firewire) 高性能串行总线网络")); break;
+    case IF_TYPE_IEEE80216_WMAN: temp = temp = QString(QObject::tr("对于 WiMax 设备的移动宽带")); break;
+    case IF_TYPE_WWANPP: temp = temp = QString(QObject::tr("基于 GSM 网络设备的移动宽带")); break;
+    case IF_TYPE_WWANPP2: temp = temp = QString(QObject::tr("基于 CDMA 的设备移动宽带")); break;
+    default: temp = temp = QString(QObject::tr("未知网络")); break;
     }
-    m_info_list.SetItemText(2, 1, temp);
+    funcAdd(QString(QObject::tr("连接类型")), temp);
 
     //m_info_list.InsertItem(3, _T("最大传输单位大小"));
     //temp.Format(_T("%u"), m_network_info.dwMtu);
     //m_info_list.SetItemText(3, 1, temp);
 
-    m_info_list.InsertItem(3, _T("速度"));
-    temp.Format(_T("%dMbps"), m_network_info.dwSpeed / 1000000);
-    m_info_list.SetItemText(3, 1, temp);
+    temp = QString("%1Mbps").arg(m_network_info.dwSpeed / 1000000.0);
+    funcAdd(QString(QObject::tr("速度")), temp);
 
-    m_info_list.InsertItem(4, _T("适配器物理地址"));
-    temp = _T("");
+    temp = QString();
     char buff[3];
-    for (int i{}; i < m_network_info.dwPhysAddrLen; i++)
+    for (int i = 0; i < m_network_info.dwPhysAddrLen; i++)
     {
         //_itoa_s(m_network_info.bPhysAddr[i], buff, 16);
         sprintf_s(buff, "%.2x", m_network_info.bPhysAddr[i]);
-        temp += buff;
+        temp.append(buff);
         if (i != m_network_info.dwPhysAddrLen - 1)
-            temp += _T('-');
+            temp.append('-');
     }
-    m_info_list.SetItemText(4, 1, temp);
+    funcAdd(QString(QObject::tr("适配器物理地址")), temp);
 
-    m_info_list.InsertItem(5, _T("IP地址"));
-    m_info_list.SetItemText(5, 1, m_ip_address.c_str());
+    funcAdd(QString(QObject::tr("IP地址")), m_ip_address);
 
-    m_info_list.InsertItem(6, _T("子网掩码"));
-    m_info_list.SetItemText(6, 1, m_subnet_mask.c_str());
+    funcAdd(QString(QObject::tr("子网掩码")), m_subnet_mask);
 
-    m_info_list.InsertItem(7, _T("默认网关"));
-    m_info_list.SetItemText(7, 1, m_default_gateway.c_str());
+    funcAdd(QString(QObject::tr("默认网关")), m_default_gateway);
 
     ////temp.Format(_T("物理地址长度：%d\r\n"), m_network_info.dwPhysAddrLen);
     ////out_info += temp;
@@ -144,41 +143,36 @@ void NetInfoDialog::AddItems()
     //m_info_list.InsertItem(5, _T("管理员状态"));
     //m_info_list.SetItemText(5, 1, m_network_info.dwAdminStatus ? _T("启用") : _T("禁用"));
 
-    m_info_list.InsertItem(8, _T("连接状态"));
     switch (m_network_info.dwOperStatus)
     {
-    case IF_OPER_STATUS_NON_OPERATIONAL: temp = _T("LAN 适配器已被禁用"); break;
-    case IF_OPER_STATUS_UNREACHABLE: temp = _T("WAN 适配器未连接"); break;
-    case IF_OPER_STATUS_DISCONNECTED: temp = _T("网络电缆断开连接或无载体"); break;
-    case IF_OPER_STATUS_CONNECTING: temp = _T("WAN 适配器正在连接"); break;
-    case IF_OPER_STATUS_CONNECTED: temp = _T("WAN 适配器连接到远程对等方"); break;
-    case IF_OPER_STATUS_OPERATIONAL: temp = _T("LAN 适配器已连接"); break;
-    default: temp = _T("未知状态"); break;
+    case IF_OPER_STATUS_NON_OPERATIONAL: temp = QString(QObject::tr("LAN 适配器已被禁用")); break;
+    case IF_OPER_STATUS_UNREACHABLE: temp = QString(QObject::tr("WAN 适配器未连接")); break;
+    case IF_OPER_STATUS_DISCONNECTED: temp = QString(QObject::tr("网络电缆断开连接或无载体")); break;
+    case IF_OPER_STATUS_CONNECTING: temp = QString(QObject::tr("WAN 适配器正在连接")); break;
+    case IF_OPER_STATUS_CONNECTED: temp = QString(QObject::tr("WAN 适配器连接到远程对等方")); break;
+    case IF_OPER_STATUS_OPERATIONAL: temp = QString(QObject::tr("LAN 适配器已连接")); break;
+    default: temp = QString(QObject::tr("未知状态")); break;
     }
-    m_info_list.SetItemText(8, 1, temp);
+    funcAdd(QString(QObject::tr("连接状态")), temp);
 
-    m_info_list.InsertItem(9, _T("已接收字节数"));
-    temp.Format(_T("%u (%s)"), m_network_info.dwInOctets, CCommon::DataSizeToString(m_network_info.dwInOctets));
-    m_info_list.SetItemText(9, 1, temp);
 
-    m_info_list.InsertItem(10, _T("已发送字节数"));
-    temp.Format(_T("%u (%s)"), m_network_info.dwOutOctets, CCommon::DataSizeToString(m_network_info.dwOutOctets));
-    m_info_list.SetItemText(10, 1, temp);
+    temp = QString("%1 (%2)").arg(m_network_info.dwInOctets).arg(FormatUtils::SpeedToString(m_network_info.dwInOctets));
+    funcAdd(QString(QObject::tr("已接收字节数")), temp);
 
-    m_info_list.InsertItem(11, _T("自程序启动以来已接收字节数"));
-    temp.Format(_T("%u (%s)"), m_in_bytes, CCommon::DataSizeToString(m_in_bytes));
-    m_info_list.SetItemText(11, 1, temp);
+    temp = QString("%1 (%2)").arg(m_network_info.dwOutOctets).arg(FormatUtils::SpeedToString(m_network_info.dwOutOctets));
+    funcAdd(QString(QObject::tr("已发送字节数")), temp);
 
-    m_info_list.InsertItem(12, _T("自程序启动以来已发送字节数"));
-    temp.Format(_T("%u (%s)"), m_out_bytes, CCommon::DataSizeToString(m_out_bytes));
-    m_info_list.SetItemText(12, 1, temp);
+    temp = QString("%1 (%2)").arg(m_in_bytes).arg(FormatUtils::SpeedToString(m_in_bytes));
+    funcAdd(QString(QObject::tr("自程序启动以来已接收字节数")), temp);
 
-    m_info_list.InsertItem(13, _T("程序已运行时间"));
-    SYSTEMTIME current_time, time;
-    GetLocalTime(&current_time);
-    time = CCommon::CompareSystemTime(current_time, m_start_time);
-    temp.Format(_T("%d小时%d分%d秒"), time.wHour, time.wMinute, time.wSecond);
-    m_info_list.SetItemText(13, 1, temp);*/
+    temp = QString("%1 (%2)").arg(m_out_bytes).arg(FormatUtils::SpeedToString(m_out_bytes));
+    funcAdd(QString(QObject::tr("自程序启动以来已发送字节数")), temp);
+
+    QDateTime now = QDateTime::currentDateTime();
+    QTime spec(0, 0, 0);
+    spec = spec.addSecs(m_start_time.secsTo(now));
+    temp = QString("%1小时%2分%3秒").arg(spec.hour()).arg(spec.minute()).arg(spec.second());
+    funcAdd(QString(QObject::tr("程序已运行时间")), temp);
 }
 
 void NetInfoDialog::on_closeBtn_clicked()

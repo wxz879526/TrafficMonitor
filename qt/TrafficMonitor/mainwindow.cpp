@@ -9,12 +9,14 @@
 #include <QTimer>
 #include "netinfodialog.h"
 #include "formatutils.h"
+#include <QDateTime>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    m_startTime = QDateTime::currentDateTime();
     ui->setupUi(this);
     SetupTray();
     initConnections();
@@ -79,7 +81,11 @@ void MainWindow::SetupTray()
     m_trayMenu = new QMenu(this);
     auto pConnDetailAction = new QAction(QObject::tr("连接详情"), this);
     connect(pConnDetailAction, &QAction::triggered, this, [=](){
-        NetInfoDialog dlg(m_pIfTable->table[m_connections[m_connection_selected].index], this);
+        NetInfoDialog dlg(m_pIfTable->table[m_connections[m_connection_selected].index],
+                m_pIfTable->table[m_connections[m_connection_selected].index].dwInOctets - m_connections[m_connection_selected].in_bytes,
+                m_pIfTable->table[m_connections[m_connection_selected].index].dwOutOctets - m_connections[m_connection_selected].out_bytes,
+                m_startTime,
+                this);
         dlg.exec();
     });
     auto pTopMostAction = new QAction(QObject::tr("总是置顶"), this);
