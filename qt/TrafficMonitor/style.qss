@@ -1,0 +1,4 @@
+QLineEdit
+{
+        background-color: yellow
+}

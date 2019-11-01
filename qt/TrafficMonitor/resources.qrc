@@ -4,5 +4,6 @@
         <file>image/notifyicon2.ico</file>
         <file>image/notifyicon3.ico</file>
         <file>image/TrafficMonitor.ico</file>
+        <file>style.qss</file>
     </qresource>
 </RCC>

@@ -28,17 +28,20 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     formatutils.cpp \
-    netinfodialog.cpp
+    netinfodialog.cpp \
+    updatetipsdialog.cpp
 
 HEADERS += \
         mainwindow.h \
     formatutils.h \
     commonheader.h \
-    netinfodialog.h
+    netinfodialog.h \
+    updatetipsdialog.h
 
 FORMS += \
         mainwindow.ui \
-    netinfodialog.ui
+    netinfodialog.ui \
+    updatetipsdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -64,3 +67,5 @@ win32 {
         message($$dst_dir)
         system(xcopy $$skin_files_dir $$dst_dir /y /e)
 }
+
+DISTFILES +=
