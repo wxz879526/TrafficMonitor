@@ -18,8 +18,7 @@ int main(int argc, char *argv[])
         QFile file(":/style.qss");
         if (file.open(QFile::ReadOnly))
         {
-            QString strQss = QLatin1String(file.readAll());
-            qDebug() << strQss;
+            QString strQss = file.readAll();
             qApp->setStyleSheet(strQss);
         }
     }
