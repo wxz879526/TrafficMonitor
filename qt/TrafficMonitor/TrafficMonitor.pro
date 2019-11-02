@@ -29,14 +29,20 @@ SOURCES += \
         mainwindow.cpp \
     formatutils.cpp \
     netinfodialog.cpp \
-    updatetipsdialog.cpp
+    updatetipsdialog.cpp \
+    widgets/framelessdialog.cpp \
+    widgets/dialogtip.cpp \
+    globalobjects.cpp
 
 HEADERS += \
         mainwindow.h \
     formatutils.h \
     commonheader.h \
     netinfodialog.h \
-    updatetipsdialog.h
+    updatetipsdialog.h \
+    widgets/framelessdialog.h \
+    widgets/dialogtip.h \
+    globalobjects.h
 
 FORMS += \
         mainwindow.ui \

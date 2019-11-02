@@ -1,13 +1,13 @@
-#ifndef UPDATETIPSDIALOG_H
+﻿#ifndef UPDATETIPSDIALOG_H
 #define UPDATETIPSDIALOG_H
 
-#include <QDialog>
+#include "widgets/framelessdialog.h"
 
 namespace Ui {
 class UpdateTipsDialog;
 }
 
-class UpdateTipsDialog : public QDialog
+class UpdateTipsDialog : public CFramelessDialog
 {
     Q_OBJECT
 

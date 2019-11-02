@@ -3,6 +3,7 @@
 #include "updatetipsdialog.h"
 #include <QFile>
 #include <QDebug>
+#include "globalobjects.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -22,6 +23,8 @@ int main(int argc, char *argv[])
             qApp->setStyleSheet(strQss);
         }
     }
+
+    GlobalObjects::init();
 
     if (!QSystemTrayIcon::isSystemTrayAvailable())
     {

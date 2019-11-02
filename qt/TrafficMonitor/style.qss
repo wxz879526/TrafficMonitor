@@ -1,4 +1,19 @@
-QLineEdit
-{
-        background-color: yellow
+#framelessDialog {
+	background-color: rgb(245,245,245);
+}
+
+QPushButton#DialogCloseButton {
+	border: none;
+	background-color: transparent;
+	color: rgb(153,153,153);
+}
+
+QPushButton#DialogCloseButton:hover {
+	background-color: rgb(250,54,5);
+	color: rgb(255,255,255);
+}
+
+QPushButton#DialogCloseButton:pressed {
+	background-color: rgb(218,46,3);
+	color: rgb(255,255,255);
 }
